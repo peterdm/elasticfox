@@ -9,6 +9,7 @@ Basic POC methods skeleton for elasticsearch
 
 import pyes # http://pypi.python.org/pypi/pyes/
 import csv
+import subprocess # only for temporary dirty hack
 
 
 ######## configuration parameters ########
@@ -17,6 +18,7 @@ PORT = '9200'
 RAW_DATA_FILE = 'artist-test.tsv'
 INDEX_NAME = 'artist'
 DOC_TYPE = 'artist-test-doc-type'
+SETUP_SCRIPT = './setup_artist.sh'
 
 # Index SETTINGS -- Used to configure analysers, etc...  (es.update_settings)
 SETTINGS = ''
@@ -115,11 +117,13 @@ def deleteIndex(conn, indexName):
 		return False
 
 def createIndex(conn, indexName, deleteIfExists=False):
-	if deleteIfExists:
-		deleteIndex(conn, indexName)
+	#if deleteIfExists:
+	#	deleteIndex(conn, indexName)
 	
 	print "creating " + indexName
-	conn.create_index(indexName)
+	subprocess.call([SETUP_SCRIPT])
+	
+	#conn.create_index(indexName)
 
 def createMapping(conn, indexName, docType, mapping):
 	conn.put_mapping(docType, mapping, [indexName])
@@ -130,7 +134,7 @@ def updateSettings(conn, indexName, settings):
 
 def init(indexName, docType, mapping, settings):
 	conn = pyes.ES(['%s:%s' % (SERVER, PORT)]) 
-	#createIndex(conn, indexName, deleteIfExists=True)
+	createIndex(conn, indexName, deleteIfExists=False)
 	#createMapping(conn, indexName, docType, mapping)
 	#updateSettings(conn, indexName, settings)
 	return conn
@@ -164,7 +168,6 @@ def search(conn, query):
 	print result
 
 
-# TODO: implement exact match search (on entity title)
 def exactMatchSearch(conn, query):
 	q = pyes.TextQuery("title", query, 'phrase')
 	print q.serialize()
@@ -172,12 +175,22 @@ def exactMatchSearch(conn, query):
 	result = conn.search_raw(query=q)
 	print result
 		
-# TODO: implement auto-complete search
 def prefixingSearch(conn, query):
 	q = pyes.TextQuery("title", query, 'phrase_prefix')
 	print q.serialize()
 	
 	result = conn.search_raw(query=q)
+	print result
+	
+def ngramPrefixingSearch(conn, query):
+	xq = pyes.TextQuery("title", query);
+	pq = pyes.TextQuery("title.partial", query)
+	
+	q = pyes.BoolQuery()
+	q.add_should(xq).add_should(pq);
+	print q.serialize()
+	
+	result = conn.search_raw(query=q) # TODO:  Figure out how to use normal scrollable Result
 	print result
 	
 def interactiveQuery(conn, queryFunc):
@@ -195,5 +208,5 @@ if __name__ == '__main__':
 	index(conn, RAW_DATA_FILE, INDEX_NAME, DOC_TYPE )
 	conn.flush()
 	
-	interactiveQuery(conn, prefixingSearch)
+	interactiveQuery(conn, ngramPrefixingSearch)
 ######################
