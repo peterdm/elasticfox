@@ -12,7 +12,7 @@ import csv
 
 
 ######## configuration parameters ########
-SERVER = 'ec2-107-20-78-92.compute-1.amazonaws.com'
+SERVER = 'localhost'
 PORT = '9200'
 RAW_DATA_FILE = 'artist-test.tsv'
 INDEX_NAME = 'artist'
