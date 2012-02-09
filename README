@@ -1,0 +1,26 @@
+#============
+# Exact match
+#============
+# Should hit
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query": "the high level Ranters", "type": "phrase" }}}}}}'
+
+# Should miss
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "the high lev", "type": "phrase" }}}}}}'
+
+
+
+#==============
+# Phrase prefix (not using ngrams yet)
+#==============
+
+# Should hit
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query": "the high lev", "type": "phrase_prefix" }}}}}}'
+
+# Should also hit
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "the high level Ranters", "type": "phrase_prefix" }}}}}}'
+
+
+
+##
+## Ngrams approach requires defining a custom analyser at index-time.  I haven't found a query-time way to do this yet.
+##
