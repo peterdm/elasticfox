@@ -56,53 +56,51 @@ SETTINGS = ''
 
 
 # TODO: modify the mapping to represent the current schema
-MAPPING = { 
-			u'id' : {
-					u'store': u'yes',
-					u'type': u'string',
-			},
-			u'title': {
-					u'boost': 1.0,
-					u'type': u'multi_field',
-					u'fields': {
-							u'partial': {
-									u'type': u'string',
-									u'search_analyzer': u'full_phrase',
-									u'index_analyzer': u'partial_phrase'
-							},
-							u'title': {
-									u'type': u'string',
-									u'analyzer': u'full_phrase'
-							}
-					}
-			},
-			u'context' : {
-					u'index': u'analyzed',
-					u'store': u'yes',
-					u'type': u'string'
-			},
-			u'weight' : {
-					u'store': u'yes',
-					u'type': u'float'
-			},
-			u'disambig_number' : {
-					u'store': u'yes',
-					u'type': u'integer'
-			},
-			u'aliases' : {
-					u'index': u'analyzed',
-					u'store': u'yes',
-					u'type': u'string'
-			}
+MAPPING = ''  # See setup_artist.sh for mapping info
+#{ 
+#			u'id' : {
+#					u'store': u'yes',
+#					u'type': u'string',
+#			},
+#			u'title': {
+#					u'boost': 1.0,
+#					u'type': u'multi_field',
+#					u'fields': {
+#							u'partial': {
+#									u'type': u'string',
+#									u'search_analyzer': u'full_phrase',
+#									u'index_analyzer': u'partial_phrase'
+#							},
+#							u'title': {
+#									u'type': u'string',
+#									u'analyzer': u'full_phrase'
+#							}
+#					}
+#			},
+#			u'context' : {
+#					u'index': u'analyzed',
+#					u'store': u'yes',
+#					u'type': u'string'
+#			},
+#			u'weight' : {
+#					u'store': u'yes',
+#					u'type': u'float'
+#			},
+#			u'disambig_number' : {
+#					u'store': u'yes',
+#					u'type': u'integer'
+#			},
+#			u'aliases' : {
+#					u'index': u'analyzed',
+#					u'store': u'yes',
+#					u'type': u'string'
+#			}
 # 'type' conflicts with internal ES 'type' field -- if you want to handle this field specially, the name needs changing
 #			u'type' : {
 #					'store': 'yes',
 #					'type': 'string'
 #			},
-
-
-
-}
+#}
 
 ###########################################
 
@@ -132,8 +130,8 @@ def updateSettings(conn, indexName, settings):
 
 def init(indexName, docType, mapping, settings):
 	conn = pyes.ES(['%s:%s' % (SERVER, PORT)]) 
-	createIndex(conn, indexName, deleteIfExists=True)
-	createMapping(conn, indexName, docType, mapping)
+	#createIndex(conn, indexName, deleteIfExists=True)
+	#createMapping(conn, indexName, docType, mapping)
 	#updateSettings(conn, indexName, settings)
 	return conn
 
@@ -192,6 +190,7 @@ def interactiveQuery(conn, queryFunc):
 
 ######## main ########
 if __name__ == '__main__':
+	print "For now, create the index and custom analyzers first using setup_artist.sh"
 	conn = init(INDEX_NAME, DOC_TYPE, MAPPING, SETTINGS)
 	index(conn, RAW_DATA_FILE, INDEX_NAME, DOC_TYPE )
 	conn.flush()
