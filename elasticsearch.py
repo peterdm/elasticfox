@@ -10,7 +10,7 @@ Basic POC methods skeleton for elasticsearch
 import pyes # http://pypi.python.org/pypi/pyes/
 import csv
 import subprocess # only for temporary dirty hack
-
+import json
 
 ######## configuration parameters ########
 SERVER = 'localhost'
@@ -139,7 +139,19 @@ def init(indexName, docType, mapping, settings):
 	#updateSettings(conn, indexName, settings)
 	return conn
 
-
+def printResult(rs):
+	print "==================================="
+	print "Query: %(query)s" % {"query":rs.query}
+	print "-----------------------------------"
+	print "Found %(total)d results" % {"total":rs.total}
+	print "-----------------------------------"
+	print "Facets: %(facets)r" % {"facets":rs.facets}
+	print "==================================="
+	for result in rs:
+	  print result
+	  print "..................................."
+	print
+	print
 
 ##################################
 
@@ -170,42 +182,46 @@ def search(conn, query):
 
 def exactMatchSearch(conn, query):
 	q = pyes.TextQuery("title", query, 'phrase')
-	print q.serialize()
-	
-	result = conn.search_raw(query=q)
-	print result
+	s = q.search() # get a search object
+	s.facet.add_term_facet('type')
+	printResult(conn.search(query=s))
 		
 def prefixingSearch(conn, query):
 	q = pyes.TextQuery("title", query, 'phrase_prefix')
-	print q.serialize()
-	
-	result = conn.search_raw(query=q)
-	print result
-
-def prefixingSearchWithTypeFacet(conn, query):
-	q = pyes.TextQuery("title", query, 'phrase_prefix')
-	s = q.search(start=10, size=15)
-	s.facet.add_term_facet('type')
-	print s.to_search_json()
-	
-	result = conn.search_raw(query=s.q())
-	print result
+	s = q.search() # get a search object : pass start= and size= for scrolling
 	
 def ngramPrefixingSearch(conn, query):
 	xq = pyes.TextQuery("title", query);
 	pq = pyes.TextQuery("title.partial", query)
 	
 	q = pyes.BoolQuery()
-	q.add_should(xq).add_should(pq);
-	print q.serialize()
-	
-	result = conn.search_raw(query=q) # TODO:  Figure out how to use normal scrollable Result
-	print result
+	q.add_should(xq).add_should(pq)
+	s = q.search()
+	s.facet.add_term_facet('type')
+	printResult(conn.search(query=s))
+
 	
 def interactiveQuery(conn, queryFunc):
 	while True:
 		q = raw_input('--> ')
 		queryFunc(conn, q)
+
+def chooseSearch():
+	print ""
+	print "Choose search type?"
+	print "==================="
+	print "1. Exact Match"
+	print "2. Prefix Match"
+	print "3. Prefix Match using Ngrams"
+
+	choice = raw_input('>> ')
+
+	if (choice=='1'): return exactMatchSearch
+	elif (choice=='2'): return prefixingSearch
+	elif (choice=='3'): return ngramPrefixingSearch
+	else: return chooseSearch()
+
+
 
 ###############################################
 
@@ -216,6 +232,7 @@ if __name__ == '__main__':
 	conn = init(INDEX_NAME, DOC_TYPE, MAPPING, SETTINGS)
 	index(conn, RAW_DATA_FILE, INDEX_NAME, DOC_TYPE )
 	conn.flush()
-	
-	interactiveQuery(conn, prefixingSearchWithTypeFacet)
+
+	queryFunc = chooseSearch()	
+	interactiveQuery(conn, queryFunc)
 ######################
