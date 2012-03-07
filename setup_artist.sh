@@ -18,7 +18,6 @@ curl -XPUT 'localhost:9200/artist' -d '
 			"full_phrase": {
 				"type": "custom",
 				"filter": [
-					"standard",
 					"lowercase",
 					"asciifolding"
 				],
@@ -27,7 +26,6 @@ curl -XPUT 'localhost:9200/artist' -d '
 			"partial_phrase": {
 				"type": "custom",
 				"filter": [
-					"standard",
 					"lowercase",
 					"asciifolding",
 					"phrase_ngrams"

@@ -20,6 +20,24 @@ curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operat
 curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "giant tomo", "type": "phrase_prefix" }}}}}}'
 
 
+#=============
+# Autocomplete (using ngrams and a boolean query)
+#
+# title := (title.title) the exact match field
+# title.partial := ngrammed
+#
+# The boolean query sums the hits, so either an exact or a partial will return, 
+# however an exact match will hit on both fields and score higher.
+#=============
+
+curl 'localhost:9200/artist/_search' -d '
+	{ "query": 
+		{ "bool": 
+			{ "should": [ 
+				{ "text": { "title": "The High" } },
+				{ "text": { "title.partial": "The High" } }
+	]}}}'
+
 
 ##
 ## Ngrams approach requires defining a custom analyser at index-time.  I haven't found a query-time way to do this yet.  (See setup_artist.sh)
