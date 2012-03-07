@@ -217,5 +217,5 @@ if __name__ == '__main__':
 	index(conn, RAW_DATA_FILE, INDEX_NAME, DOC_TYPE )
 	conn.flush()
 	
-	interactiveQuery(conn, ngramPrefixingSearch)
+	interactiveQuery(conn, prefixingSearchWithTypeFacet)
 ######################
