@@ -181,6 +181,15 @@ def prefixingSearch(conn, query):
 	
 	result = conn.search_raw(query=q)
 	print result
+
+def prefixingSearchWithTypeFacet(conn, query):
+	q = pyes.TextQuery("title", query, 'phrase_prefix')
+	s = q.search(start=10, size=15)
+	s.facet.add_term_facet('type')
+	print s.to_search_json()
+	
+	result = conn.search_raw(query=s.q())
+	print result
 	
 def ngramPrefixingSearch(conn, query):
 	xq = pyes.TextQuery("title", query);

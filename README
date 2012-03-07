@@ -2,10 +2,10 @@
 # Exact match
 #============
 # Should hit
-curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query": "the high level Ranters", "type": "phrase" }}}}}}'
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query": "giant tomo", "type": "phrase" }}}}}}'
 
 # Should miss
-curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "the high lev", "type": "phrase" }}}}}}'
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "giant tom", "type": "phrase" }}}}}}'
 
 
 
@@ -14,13 +14,47 @@ curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operat
 #==============
 
 # Should hit
-curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query": "the high lev", "type": "phrase_prefix" }}}}}}'
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query": "giant tom", "type": "phrase_prefix" }}}}}}'
 
 # Should also hit
-curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "the high level Ranters", "type": "phrase_prefix" }}}}}}'
+curl 'localhost:9200/artist/_search' -d '{"query": {"text": { "title" : {"operator": "or", "query" : "giant tomo", "type": "phrase_prefix" }}}}}}'
 
 
 
 ##
-## Ngrams approach requires defining a custom analyser at index-time.  I haven't found a query-time way to do this yet.
+## Ngrams approach requires defining a custom analyser at index-time.  I haven't found a query-time way to do this yet.  (See setup_artist.sh)
 ##
+
+
+#==============
+# Facet query 
+# (filter on values for field 'type' -- params:  size=0 means we don't care to see the query results,  pretty=true: indents/formats response)
+#==============
+
+curl "http://localhost:9200/artist/_search?size=0&pretty=true" -d '
+  {
+    "facets" : {
+      "type" : { "terms" : {"field" : "type"}, "global" : true }
+    }
+  }
+
+curl "http://localhost:9200/artist/_search?size=0&pretty=true" -d '
+  {
+    "facets" : {
+      "foobar" : { "terms" : {"fields" : ["title", "type"] }, "global" : true }
+    }
+  }
+  
+# "global":true means don't restrict the facet counts to this particular search ... in this case we're not actually doing a search
+# "foobar" is just to illustrate that this field is a label or name for the facet (even if it's over a group of fields)
+  
+  
+#==============
+# Sort options (add query parameter sort=fieldName1,fieldName2:desc)
+#==============
+
+#==============
+# Pagination options (add query parameters from=100 (like offset), size=10 (like limit))
+#==============
+
+
