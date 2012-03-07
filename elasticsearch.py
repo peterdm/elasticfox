@@ -188,7 +188,10 @@ def exactMatchSearch(conn, query):
 		
 def prefixingSearch(conn, query):
 	q = pyes.TextQuery("title", query, 'phrase_prefix')
-	s = q.search() # get a search object : pass start= and size= for scrolling
+	#s = q.search(start=5, size=10, sort={"type" : "desc"}) # example of pagination + sorting
+	s = q.search() 
+	s.facet.add_term_facet('type')
+	printResult(conn.search(query=s))
 	
 def ngramPrefixingSearch(conn, query):
 	xq = pyes.TextQuery("title", query);
