@@ -13,7 +13,7 @@ import subprocess # only for temporary dirty hack
 import json
 
 ######## configuration parameters ########
-SERVER = 'localhost'
+SERVER = '107.22.137.196'
 PORT = '9200'
 RAW_DATA_FILE = 'artist-test.tsv'
 INDEX_NAME = 'artist'
@@ -148,8 +148,8 @@ def printResult(rs):
 	print "Facets: %(facets)r" % {"facets":rs.facets}
 	print "==================================="
 	for result in rs:
-	  print result
-	  print "..................................."
+		print result
+		print "..................................."
 	print
 	print
 
@@ -188,7 +188,7 @@ def exactMatchSearch(conn, query):
 		
 def prefixingSearch(conn, query):
 	q = pyes.TextQuery("title", query, 'phrase_prefix')
-	#s = q.search(start=5, size=10, sort={"type" : "desc"}) # example of pagination + sorting
+	#s = q.search(start=5, size=10, sort={"type":"desc"}) # example of pagination + sorting
 	s = q.search() 
 	s.facet.add_term_facet('type')
 	printResult(conn.search(query=s))

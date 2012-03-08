@@ -1,8 +1,10 @@
 #!/bin/sh
 
-curl -XDELETE 'localhost:9200/artist';
+HOST=107.22.137.196
 
-curl -XPUT 'localhost:9200/artist' -d '
+curl -XDELETE $HOST':9200/artist';
+
+curl -XPUT $HOST':9200/artist' -d '
 {
    "settings": {
 	"analysis": {
